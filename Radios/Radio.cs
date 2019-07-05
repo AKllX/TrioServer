@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Net;
 
+
 namespace TrioServer.Radios
 {
     public class Radio : IRadioTrio
@@ -29,10 +30,8 @@ namespace TrioServer.Radios
         }
         public void Initialize()
         {
-
             
         }
-
 
         public void Update()
         {

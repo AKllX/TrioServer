@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Linq;
 using System.Net.Sockets;
+using System.IO;
+using System.Linq;
 
+
+using TrioServer.Composers;
 using TrioServer.Communication;
 
 namespace TrioServer.Sessions
@@ -14,6 +18,15 @@ namespace TrioServer.Sessions
         private byte[] mBuffer;
         private double mStoppedTimestamp;
         private bool mAuthProcessed;
+        private byte packetCounter;
+
+        public Channel Channel
+        {
+            get
+            {
+                return mChannel;
+            }
+        }
 
         public uint Id
         {
@@ -45,12 +58,18 @@ namespace TrioServer.Sessions
             mSocket = Socket;
             mBuffer = new byte[512];
             mChannel = channel;
+            packetCounter = 0;
 
             mSocket.Blocking = false;
 
             BeginReceive();
 
-            Console.WriteLine("Started client " + Id + ".");
+            Console.WriteLine("Canal aberto: " +Socket.LocalEndPoint.ToString());
+        }
+
+        public byte PacketTick()
+        {
+            return packetCounter++;
         }
 
         private void BeginReceive()
@@ -70,7 +89,6 @@ namespace TrioServer.Sessions
 
         private void OnReceiveData(IAsyncResult Result)
         {
-            Console.WriteLine("Mensagem recebida");
             int ByteCount = 0;
 
             try
@@ -101,7 +119,7 @@ namespace TrioServer.Sessions
             {
                 if (mSocket != null)
                 {
-                    mSocket.BeginSend(Data, 0, Data.Length, SocketFlags.None, new AsyncCallback(OnDataSent), null);
+                    mSocket.BeginSendTo(Data, 0, Data.Length, SocketFlags.None,this.Channel.RemoteEndPoint, new AsyncCallback(OnDataSent), null);
                 }
             }
             catch (Exception e)
@@ -149,5 +167,14 @@ namespace TrioServer.Sessions
             mBuffer = null;
         }
 
+        public void TryAcknowledge()
+        {
+            MemoryStream packet;
+            packet = AcknowledgeComposer.Serialize(this);
+            SendData(packet.ToArray());
+            packet = HandshakeComposer.Serialize(this);
+            System.Threading.Thread.Sleep(1000);
+            SendData(packet.ToArray());
+        }
     }
 }

@@ -134,5 +134,13 @@ namespace TrioServer.Sessions
                 mSessions.Add(id, new Session(id, socket, channel));
             }
         }
+
+        public static void InitCommuncations()
+        {
+            foreach(Session s in mSessions.Values)
+            {
+                s.TryAcknowledge();
+            }
+        }
     }
 }

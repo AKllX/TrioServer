@@ -33,6 +33,7 @@ namespace TrioServer.Communication
             int r_port;
             int l_port;
             int poolingInterval;
+            int msn;
 
             try
             {
@@ -41,8 +42,9 @@ namespace TrioServer.Communication
                 r_port = Convert.ToInt32(row["port_remote"]);
                 l_port = Convert.ToInt32(row["port_local"]);
                 poolingInterval = Convert.ToInt32(row["pooling_t"]);
+                msn = Convert.ToInt32(row["master_serial"]);
 
-                Channels.Add(new Channel(id, ip, r_port,l_port, poolingInterval));
+                Channels.Add(new Channel(id, ip, r_port,l_port, poolingInterval,msn));
             }
             catch(Exception ex)
             {

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Net;
+using System.Linq;
 
 namespace TrioServer.Communication
 {
@@ -13,13 +14,15 @@ namespace TrioServer.Communication
         public int LocalPort { get; private set; }
         public int RemotePort { get; private set; }
         public int PoolingInterval { get; set; }
+        public int MasterSerialNumber { get; private set; }
 
-        public Channel(int id, string ip, int r_port, int l_port, int poolingInterval)
+        public Channel(int id, string ip, int r_port, int l_port, int poolingInterval, int masterSn)
         {
             Id = id;
             RemotePort = r_port;
             LocalPort = l_port;
             PoolingInterval = poolingInterval;
+            MasterSerialNumber = masterSn;
 
             IPAddress myAddress;
             if (IPAddress.TryParse(ip, out myAddress))
@@ -29,6 +32,18 @@ namespace TrioServer.Communication
             }
             else
                 throw new ArgumentException(String.Format("O endereço {0}:{1} não é válido", ip, r_port));
+        }
+
+        public byte[] SerialNumberParse()
+        {
+            string digits = MasterSerialNumber.ToString("D6");
+
+            byte[] myData = Enumerable.Range(0, digits.Length)
+                         .Where(x => x % 2 == 0)
+                         .Select(x => Convert.ToByte(digits.Substring(x, 2), 16))
+                         .ToArray();
+
+            return myData;
         }
     }
 }
