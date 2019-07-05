@@ -6,8 +6,13 @@ namespace TrioServer
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            Console.WriteLine("Iniciando...");
+            Core.Initialize();
+            Console.WriteLine("Servidor iniciado com sucesso");
+            while(true)
+            {
 
+            }
         }
 
         public static double GetCurrentTimestamp()

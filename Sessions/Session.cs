@@ -47,9 +47,10 @@ namespace TrioServer.Sessions
             mChannel = channel;
 
             mSocket.Blocking = false;
-            Console.WriteLine("Started client " + Id + ".");
 
             BeginReceive();
+
+            Console.WriteLine("Started client " + Id + ".");
         }
 
         private void BeginReceive()
@@ -69,6 +70,7 @@ namespace TrioServer.Sessions
 
         private void OnReceiveData(IAsyncResult Result)
         {
+            Console.WriteLine("Mensagem recebida");
             int ByteCount = 0;
 
             try

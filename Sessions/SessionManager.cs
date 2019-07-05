@@ -126,7 +126,7 @@ namespace TrioServer.Sessions
         {
             Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
             socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-            socket.Bind(channel.EndPoint);
+            socket.Bind(channel.LocalEndPoint);
 
             lock(mSyncRoot)
             {

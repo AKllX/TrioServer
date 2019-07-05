@@ -11,7 +11,7 @@ namespace TrioServer.Communication
 {
     public class ChannelManager
     {
-        private List<Channel> Channels { get; set; }
+        public List<Channel> Channels { get; private set; }
 
         public ChannelManager()
         {
@@ -30,17 +30,19 @@ namespace TrioServer.Communication
         {
             int id;
             string ip;
-            int port;
+            int r_port;
+            int l_port;
             int poolingInterval;
 
             try
             {
                 id = Convert.ToInt32(row["id"]);
                 ip = Convert.ToString(row["ip_address"]);
-                port = Convert.ToInt32(row["port"]);
+                r_port = Convert.ToInt32(row["port_remote"]);
+                l_port = Convert.ToInt32(row["port_local"]);
                 poolingInterval = Convert.ToInt32(row["pooling_t"]);
 
-                Channels.Add(new Channel(id, ip, port, poolingInterval));
+                Channels.Add(new Channel(id, ip, r_port,l_port, poolingInterval));
             }
             catch(Exception ex)
             {
