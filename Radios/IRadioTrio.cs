@@ -11,10 +11,12 @@ namespace TrioServer.Radios
         int SerialNumber { get; }
         string Desc { get; }
         RadioType Type { get; }
-        IPEndPoint Address { get; }
         OperationMode OpMode { get; }
         //TODO : Sessions
         bool Initialized { get; }
+
+        int MasterId { get; }
+        int ChannelId { get; }
 
         void Initialize();
         void Update();
