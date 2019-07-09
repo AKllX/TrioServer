@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Net.Sockets;
 using System.IO;
-using System.Linq;
+using System.Threading;
 
 
 using TrioServer.Composers;
@@ -52,6 +52,8 @@ namespace TrioServer.Sessions
             }
         }
 
+        public int AuthMessageCounter { get; set; }
+
         public Session(uint Id, Socket Socket, Channel channel)
         {
             mId = Id;
@@ -59,6 +61,7 @@ namespace TrioServer.Sessions
             mBuffer = new byte[512];
             mChannel = channel;
             packetCounter = 0;
+            AuthMessageCounter = 0;
 
             mSocket.Blocking = false;
 
@@ -106,9 +109,9 @@ namespace TrioServer.Sessions
                 return;
             }
 
-            //TODO: ProcessData
+            ProcessData(mBuffer);
 
-            Console.WriteLine(BitConverter.ToString(mBuffer));
+            Console.WriteLine(BitConverter.ToString(mBuffer.
 
             BeginReceive();
         }
@@ -148,7 +151,25 @@ namespace TrioServer.Sessions
 
         private void ProcessData(byte[] Data)
         {
-            //TODO
+            if (Data.Length == 0)
+            {
+                return;
+            }
+            else
+            {
+                int i = 4;
+                int radioSn;
+                byte[] content = new byte[Data.Length - 7];
+
+                radioSn = Program.GetSerialNumberFromBytes(new byte[] { Data[i++], Data[i++], Data[i++] });
+                for(int j =0; j < content.Length; j++)
+                {
+                    content[j] = Data[i];
+                    i++;
+                }
+                RadioMessage message = new RadioMessage(radioSn, content);
+                handleMessage(message);
+            }
         }
 
         public void Stop()
@@ -172,9 +193,33 @@ namespace TrioServer.Sessions
             MemoryStream packet;
             packet = AcknowledgeComposer.Serialize(this);
             SendData(packet.ToArray());
-            packet = HandshakeComposer.Serialize(this);
-            System.Threading.Thread.Sleep(1000);
-            SendData(packet.ToArray());
+        }
+
+        private void handleMessage(RadioMessage message)
+        {
+            Console.WriteLine(message.RadioSerialNumber);
+            byte fun = message.GetByte();
+            byte counter = message.GetByte();
+            Console.WriteLine(BitConverter.ToString(new byte[] { counter }));
+            switch(AuthMessageCounter)
+            {
+                case 1:
+                    {
+                        SendData(HandshakeComposer.Serialize(this).ToArray());
+                        break;
+                    }
+                case 2:
+                    {
+                        SendData(CalibrationComposer.Serialize(this).ToArray());
+                        break;
+                    }
+                default:
+                    {
+                        Thread.Sleep(2000);
+                        SendData(UpdateMeasurements.Serialize(this).ToArray());
+                        break;
+                    }
+            }
         }
     }
 }
