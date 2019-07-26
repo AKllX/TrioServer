@@ -7,14 +7,14 @@ using System.Threading;
 
 using TrioServer.Composers;
 using TrioServer.Communication;
+using TrioServer.Handlers;
 
 namespace TrioServer.Sessions
 {
     public class Session : IDisposable
     {
-        private uint mId;
         private Socket mSocket;
-        private Channel mChannel;
+        private readonly Channel mChannel;
         private byte[] mBuffer;
         private double mStoppedTimestamp;
         private bool mAuthProcessed;
@@ -28,13 +28,7 @@ namespace TrioServer.Sessions
             }
         }
 
-        public uint Id
-        {
-            get
-            {
-                return mId;
-            }
-        }
+        public uint Id { get; }
 
         public double TimeStopped
         {
@@ -53,10 +47,11 @@ namespace TrioServer.Sessions
         }
 
         public int AuthMessageCounter { get; set; }
+        public bool MAuthProcessed { get => mAuthProcessed; set => mAuthProcessed = value; }
 
         public Session(uint Id, Socket Socket, Channel channel)
         {
-            mId = Id;
+            this.Id = Id;
             mSocket = Socket;
             mBuffer = new byte[512];
             mChannel = channel;
@@ -86,7 +81,7 @@ namespace TrioServer.Sessions
             }
             catch (Exception)
             {
-                SessionManager.StopSession(mId);
+                SessionManager.StopSession(Id);
             }
         }
 
@@ -105,13 +100,11 @@ namespace TrioServer.Sessions
 
             if (ByteCount < 1 || ByteCount >= mBuffer.Length)
             {
-                SessionManager.StopSession(mId);
+                SessionManager.StopSession(Id);
                 return;
             }
 
             ProcessData(mBuffer);
-
-            Console.WriteLine(BitConverter.ToString(mBuffer.
 
             BeginReceive();
         }
@@ -145,7 +138,7 @@ namespace TrioServer.Sessions
             }
             catch (Exception)
             {
-                SessionManager.StopSession(mId);
+                SessionManager.StopSession(Id);
             }
         }
 
@@ -198,9 +191,6 @@ namespace TrioServer.Sessions
         private void handleMessage(RadioMessage message)
         {
             Console.WriteLine(message.RadioSerialNumber);
-            byte fun = message.GetByte();
-            byte counter = message.GetByte();
-            Console.WriteLine(BitConverter.ToString(new byte[] { counter }));
             switch(AuthMessageCounter)
             {
                 case 1:
@@ -211,10 +201,12 @@ namespace TrioServer.Sessions
                 case 2:
                     {
                         SendData(CalibrationComposer.Serialize(this).ToArray());
+                        MAuthProcessed = true;
                         break;
                     }
                 default:
                     {
+                        IncomingMeasurementHandler.Deserialize(message);
                         Thread.Sleep(2000);
                         SendData(UpdateMeasurements.Serialize(this).ToArray());
                         break;

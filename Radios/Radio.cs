@@ -18,7 +18,7 @@ namespace TrioServer.Radios
 
         public int MasterId { get; private set; }
 
-        public Radio(int id, int serialNum, string descp, RadioType type, String ip, int port, OperationMode opm, int mId, int cId)
+        public Radio(int id, int serialNum, string descp, RadioType type, OperationMode opm, int mId, int cId)
         {
             Id = id;
             MasterId = mId;

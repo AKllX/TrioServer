@@ -12,7 +12,6 @@ namespace TrioServer.Radios
         string Desc { get; }
         RadioType Type { get; }
         OperationMode OpMode { get; }
-        //TODO : Sessions
         bool Initialized { get; }
 
         int MasterId { get; }

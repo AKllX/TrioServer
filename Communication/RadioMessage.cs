@@ -58,6 +58,15 @@ namespace TrioServer.Communication
             return Convert.ToUInt16(ReadBytes(2));
         }
 
+        public short GetSignedInt16()
+        {
+            byte[] test = ReadBytes(2);
+            Array.Reverse(test);
+
+
+            return BitConverter.ToInt16(test);
+        }
+
         public RadioMessage(int radioSn, byte[] message)
         {
             this.RadioSerialNumber = radioSn;
