@@ -31,68 +31,116 @@ namespace TrioServer.Radios
             return myRadio;
         }
 
-        public void LoadRadio(int sn)
+        public IRadioTrio LoadRadio(DataRow data)
         {
-            DataRow data = null;
-            Radio radio = null;
+            IRadioTrio radio = null;
             RadioType radioType;
             OperationMode opMode;
+
+            if (data != null)
+            {
+                int sn = Convert.ToInt32(data["serial_number"]);
+
+                if (!LoadedRadios.Exists(x => x.SerialNumber == sn))
+                {
+                    if (data != null)
+                    {
+                        string type = Convert.ToString(data["radiotype"]);
+
+                        if (type == "qr")
+                        {
+                            radioType = RadioType.QR;
+                        }
+                        else if (type == "qb")
+                        {
+                            radioType = RadioType.QB;
+                        }
+                        else if (type == "e")
+                        {
+                            radioType = RadioType.E;
+                        }
+                        else
+                        {
+                            radioType = RadioType.MR;
+                        }
+
+                        if (Convert.ToChar(data["opmod"]) == 'm')
+                        {
+                            opMode = OperationMode.Mode_M;
+                        }
+
+                        else
+                        {
+                            opMode = OperationMode.Mode_Q;
+                        }
+
+                        radio = new Radio(
+                            Convert.ToInt32(data["id"]),
+                            Convert.ToInt32(data["serial_number"]),
+                            Convert.ToString(data["desc"]),
+                            radioType,
+                            opMode,
+                            Convert.ToInt32(data["master_id"]),
+                            Convert.ToInt32(data["channel_id"]));
+
+                        LoadedRadios.Add(radio);
+                    }
+                }
+
+                else
+                {
+                    radio = LoadedRadios.Find(x => x.SerialNumber == sn);
+                }
+            }
+
+            return radio;
+        }
+        public IRadioTrio LoadRadio(int sn)
+        {
+            DataRow data = null;
+            IRadioTrio radio = null;
 
             if (!LoadedRadios.Exists(x => x.SerialNumber == sn))
             {
 
                 using (IQueryAdapter dbClient = Core.GetDatabaseManager().GetQueryReactor())
                 {
-                    
                     dbClient.SetQuery("SELECT * FROM radios WHERE serial_number = @sn LIMIT 1;");
                     dbClient.AddParameter("sn", sn);
                     data = dbClient.getRow();
-                    string type = Convert.ToString(data["radiotype"]);
 
-                    if (type == "qr")
-                    {
-                        radioType = RadioType.QR;
-                    }
-                    else if(type == "qb")
-                    {
-                        radioType = RadioType.QB;
-                    }
-                    else if(type == "e")
-                    {
-                        radioType = RadioType.E;
-                    }
-                    else
-                    {
-                        radioType = RadioType.MR;
-                    }
-
-                    if(Convert.ToChar(data["opmod"]) =='m')
-                    {
-                        opMode = OperationMode.Mode_M;
-                    }
-
-                    else
-                    {
-                        opMode = OperationMode.Mode_Q;
-                    }
-
-                    radio = new Radio(
-                        Convert.ToInt32(data["id"]),
-                        Convert.ToInt32(data["serial_number"]),
-                        Convert.ToString(data["desc"]),
-                        radioType,
-                        opMode,
-                        Convert.ToInt32(data["master_id"]),
-                        Convert.ToInt32(data["channel_id"]));
-
-                    LoadedRadios.Add(radio);
+                    radio = LoadRadio(data);
                 }
             }
-
             else
             {
-                //TODO: Atualizar rádio já carregado
+                radio = LoadedRadios.Find(x => x.SerialNumber == sn);
             }
+
+            return radio;
+        }
+
+        public List<IRadioTrio> LoadMaster(int masterSerialNumber)
+        {
+            DataTable dataTable = null;
+            List<IRadioTrio> radios = new List<IRadioTrio>();
+            radios.Add(LoadRadio(masterSerialNumber));
+            IRadioTrio master = this.LoadRadio(masterSerialNumber);
+            if (master != null)
+            {
+                using (IQueryAdapter dbClient = Core.GetDatabaseManager().GetQueryReactor())
+                {
+                    dbClient.SetQuery("SELECT * FROM radios WHERE master_id = @masterId;");
+                    dbClient.AddParameter("masterId", master);
+                    dataTable = dbClient.getTable();
+
+                    foreach (DataRow dr in dataTable.Rows)
+                    {
+                        radios.Add(LoadRadio(dr));
+                    }
+                }
+            }
+            return radios;
         }
 
         public void SaveMeasurement(int radio_sn,double temperature, double volts, double freqerr, double rxsig, double txpwr, double vswr)

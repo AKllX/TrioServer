@@ -4,6 +4,8 @@ using System.Text;
 using System.Net;
 using System.Linq;
 
+using TrioServer.Radios;
+
 namespace TrioServer.Communication
 {
     public class Channel
@@ -15,6 +17,10 @@ namespace TrioServer.Communication
         public int RemotePort { get; private set; }
         public int PoolingInterval { get; set; }
         public int MasterSerialNumber { get; private set; }
+
+        public List<IRadioTrio> Radios { get; private set; }
+
+        private int cycleCounter;
 
         public Channel(int id, string ip, int r_port, int l_port, int poolingInterval, int masterSn)
         {
@@ -32,6 +38,13 @@ namespace TrioServer.Communication
             }
             else
                 throw new ArgumentException(String.Format("O endereço {0}:{1} não é válido", ip, r_port));
+
+            Radios = Core.GetRadioManager().LoadMaster(MasterSerialNumber);
+            foreach(IRadioTrio r in Radios)
+            {
+                Console.WriteLine("Carregando Rádio: " + r.Desc);
+            }
+            cycleCounter = 0;
         }
 
         public byte[] SerialNumberParse()
@@ -44,6 +57,20 @@ namespace TrioServer.Communication
                          .ToArray();
 
             return myData;
+        }
+
+        public IRadioTrio GetNextRadio()
+        {
+            IRadioTrio myRadio = Radios[cycleCounter];
+            if(cycleCounter == Radios.Count -1)
+            {
+                cycleCounter = 0;
+            }
+            else
+            {
+                cycleCounter++;
+            }
+            return myRadio;
         }
     }
 }

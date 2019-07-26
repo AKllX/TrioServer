@@ -8,6 +8,7 @@ using System.Threading;
 using TrioServer.Composers;
 using TrioServer.Communication;
 using TrioServer.Handlers;
+using TrioServer.Radios;
 
 namespace TrioServer.Sessions
 {
@@ -19,6 +20,7 @@ namespace TrioServer.Sessions
         private double mStoppedTimestamp;
         private bool mAuthProcessed;
         private byte packetCounter;
+        private Timer mMonitorThread;
 
         public Channel Channel
         {
@@ -59,7 +61,6 @@ namespace TrioServer.Sessions
             AuthMessageCounter = 0;
 
             mSocket.Blocking = false;
-
             BeginReceive();
 
             Console.WriteLine("Canal aberto: " +Socket.LocalEndPoint.ToString());
@@ -188,29 +189,73 @@ namespace TrioServer.Sessions
             SendData(packet.ToArray());
         }
 
+        public void RunMeasurement(object state)
+        {
+            IRadioTrio myRadio = mChannel.GetNextRadio();
+            Console.WriteLine(myRadio.Desc);
+            if(myRadio != null)
+            {
+                if (MAuthProcessed)
+                {
+                    if (myRadio.Type == RadioType.QB || myRadio.Type == RadioType.QR)
+                    {
+                        SendData(UpdateMeasurements.Serialize(this).ToArray());
+                    }
+                    else
+                    {
+                        SendData(UpdateMeasurementsM.Serialize(this).ToArray());
+                    }
+                }
+            }
+        }
+
         private void handleMessage(RadioMessage message)
         {
-            Console.WriteLine(message.RadioSerialNumber);
-            switch(AuthMessageCounter)
-            {
-                case 1:
-                    {
-                        SendData(HandshakeComposer.Serialize(this).ToArray());
-                        break;
-                    }
-                case 2:
-                    {
-                        SendData(CalibrationComposer.Serialize(this).ToArray());
-                        MAuthProcessed = true;
-                        break;
-                    }
-                default:
-                    {
-                        IncomingMeasurementHandler.Deserialize(message);
-                        Thread.Sleep(2000);
-                        SendData(UpdateMeasurements.Serialize(this).ToArray());
-                        break;
-                    }
+            IRadioTrio myRadio = Core.GetRadioManager().LoadRadio(message.RadioSerialNumber);
+
+            if(myRadio != null)
+            { 
+                RadioType radioType = Core.GetRadioManager().LoadRadio(message.RadioSerialNumber).Type;
+                //Console.WriteLine(message.RadioSerialNumber);
+                switch (AuthMessageCounter)
+                {
+                    case 1:
+                        {
+
+                            if (radioType == RadioType.QR || radioType == RadioType.QB)
+                            {
+                                SendData(HandshakeComposer.Serialize(this).ToArray());
+                            }
+                            else
+                            {
+                                SendData(HandshakeComposerM.Serialize(this).ToArray());
+                            }
+                            break;
+                        }
+                    case 2:
+                        {
+                            if (radioType == RadioType.QR || radioType == RadioType.QB)
+                            {
+                                SendData(CalibrationComposer.Serialize(this).ToArray());
+                            }
+
+                            else
+                            {
+                                SendData(CalibrationComposerM.Serialize(this).ToArray());
+                            }
+                            mMonitorThread = new Timer(new TimerCallback(RunMeasurement), null, TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(5));
+                            MAuthProcessed = true;
+                            break;
+                        }
+                    default:
+                        {
+                            if (mAuthProcessed)
+                            {
+                                IncomingMeasurementHandler.Deserialize(message);
+                            }
+                            break;
+                        }
+                }
             }
         }
     }
