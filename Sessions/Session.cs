@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Net.Sockets;
 using System.IO;
+using System.Runtime;
 using System.Threading;
 
 
@@ -21,6 +22,15 @@ namespace TrioServer.Sessions
         private bool mAuthProcessed;
         private byte packetCounter;
         private Timer mMonitorThread;
+        private DateTime mLastReceived;
+
+        public DateTime LastReceived
+        {
+            get
+            {
+                return mLastReceived;
+            }
+        }
 
         public Channel Channel
         {
@@ -53,6 +63,7 @@ namespace TrioServer.Sessions
 
         public Session(uint Id, Socket Socket, Channel channel)
         {
+            mLastReceived = DateTime.MinValue;
             this.Id = Id;
             mSocket = Socket;
             mBuffer = new byte[512];
@@ -90,6 +101,7 @@ namespace TrioServer.Sessions
         {
             int ByteCount = 0;
 
+            mLastReceived = DateTime.Now;
             try
             {
                 if (mSocket != null)
@@ -199,11 +211,11 @@ namespace TrioServer.Sessions
                 {
                     if (myRadio.Type == RadioType.QB || myRadio.Type == RadioType.QR)
                     {
-                        SendData(UpdateMeasurements.Serialize(this).ToArray());
+                        SendData(UpdateMeasurements.Serialize(this,myRadio).ToArray());
                     }
                     else
                     {
-                        SendData(UpdateMeasurementsM.Serialize(this).ToArray());
+                        SendData(UpdateMeasurementsM.Serialize(this,myRadio).ToArray());
                     }
                 }
             }
@@ -216,13 +228,14 @@ namespace TrioServer.Sessions
             if(myRadio != null)
             { 
                 RadioType radioType = Core.GetRadioManager().LoadRadio(message.RadioSerialNumber).Type;
+       
                 //Console.WriteLine(message.RadioSerialNumber);
                 switch (AuthMessageCounter)
                 {
                     case 1:
                         {
 
-                            if (radioType == RadioType.QR || radioType == RadioType.QB)
+                            if ((radioType == RadioType.QR) || (radioType == RadioType.QB))
                             {
                                 SendData(HandshakeComposer.Serialize(this).ToArray());
                             }
@@ -234,7 +247,7 @@ namespace TrioServer.Sessions
                         }
                     case 2:
                         {
-                            if (radioType == RadioType.QR || radioType == RadioType.QB)
+                            if ((radioType == RadioType.QR) || (radioType == RadioType.QB))
                             {
                                 SendData(CalibrationComposer.Serialize(this).ToArray());
                             }
@@ -243,7 +256,17 @@ namespace TrioServer.Sessions
                             {
                                 SendData(CalibrationComposerM.Serialize(this).ToArray());
                             }
-                            mMonitorThread = new Timer(new TimerCallback(RunMeasurement), null, TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(5));
+
+                            if (myRadio.OpMode == OperationMode.Mode_M)
+                            {
+                                mMonitorThread = new Timer(new TimerCallback(RunMeasurement), null, TimeSpan.FromMilliseconds(0), TimeSpan.FromSeconds(15));
+                            }
+                            else
+                            {
+                                mMonitorThread = new Timer(new TimerCallback(RunMeasurement), null, TimeSpan.FromMilliseconds(0), TimeSpan.FromSeconds(60));
+                            }
+
+
                             MAuthProcessed = true;
                             break;
                         }
@@ -251,7 +274,11 @@ namespace TrioServer.Sessions
                         {
                             if (mAuthProcessed)
                             {
-                                IncomingMeasurementHandler.Deserialize(message);
+                                byte counterCheck = message.GetByte();
+                                if (counterCheck == 0x67 || counterCheck == 0x72)
+                                {
+                                    IncomingMeasurementHandler.Deserialize(message,counterCheck);
+                                }
                             }
                             break;
                         }

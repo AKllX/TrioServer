@@ -20,5 +20,6 @@ namespace TrioServer.Radios
         void Initialize();
         void Update();
         void Close();
+        byte[] SerialNumberParse();
     }
 }

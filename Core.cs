@@ -35,7 +35,7 @@ namespace TrioServer
                 SessionManager.MakeConnection(c);
             }
 
-            SessionManager.InitCommuncations();
+            //SessionManager.InitCommuncations();
         }
 
         public static DatabaseManager GetDatabaseManager()

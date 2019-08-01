@@ -37,9 +37,12 @@ namespace TrioServer.Communication
                 LocalEndPoint = new IPEndPoint(IPAddress.Any, l_port);
             }
             else
+            {
                 throw new ArgumentException(String.Format("O endereço {0}:{1} não é válido", ip, r_port));
+            }
 
-            Radios = Core.GetRadioManager().LoadMaster(MasterSerialNumber);
+            Radios = Core.GetRadioManager().LoadChannel(this.Id);
+
             foreach(IRadioTrio r in Radios)
             {
                 Console.WriteLine("Carregando Rádio: " + r.Desc);

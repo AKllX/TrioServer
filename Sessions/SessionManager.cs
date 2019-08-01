@@ -105,6 +105,20 @@ namespace TrioServer.Sessions
 
                         continue;
                     }
+
+                    if(Session.LastReceived == DateTime.MinValue)
+                    {
+                        Session.TryAcknowledge();
+                    }
+
+                    if((Session.LastReceived - DateTime.Now).TotalMinutes > 10)
+                    {
+                        Session.MAuthProcessed = false;
+                        Session.AuthMessageCounter = 0;
+                        Session.TryAcknowledge();
+                    }
+
+
                 }
             }
 

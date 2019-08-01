@@ -120,26 +120,23 @@ namespace TrioServer.Radios
             return radio;
         }
 
-        public List<IRadioTrio> LoadMaster(int masterSerialNumber)
+        public List<IRadioTrio> LoadChannel(int channelId)
         {
             DataTable dataTable = null;
             List<IRadioTrio> radios = new List<IRadioTrio>();
-            radios.Add(LoadRadio(masterSerialNumber));
-            IRadioTrio master = this.LoadRadio(masterSerialNumber);
-            if (master != null)
-            {
-                using (IQueryAdapter dbClient = Core.GetDatabaseManager().GetQueryReactor())
-                {
-                    dbClient.SetQuery("SELECT * FROM radios WHERE master_id = @masterId;");
-                    dbClient.AddParameter("masterId", master);
-                    dataTable = dbClient.getTable();
 
-                    foreach (DataRow dr in dataTable.Rows)
-                    {
-                        radios.Add(LoadRadio(dr));
-                    }
+            using (IQueryAdapter dbClient = Core.GetDatabaseManager().GetQueryReactor())
+            {
+                dbClient.SetQuery("SELECT * FROM radios WHERE channel_id = @cId;");
+                dbClient.AddParameter("cId", channelId);
+                dataTable = dbClient.getTable();
+
+                foreach (DataRow dr in dataTable.Rows)
+                {
+                    radios.Add(LoadRadio(dr));
                 }
             }
+
             return radios;
         }
 

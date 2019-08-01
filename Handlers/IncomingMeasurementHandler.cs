@@ -8,7 +8,7 @@ namespace TrioServer.Handlers
 {
     public static class IncomingMeasurementHandler
     {
-        public static void Deserialize(RadioMessage message)
+        public static void Deserialize(RadioMessage message, byte counterCheck)
         {
             short temperature;
             short rx;
@@ -26,7 +26,7 @@ namespace TrioServer.Handlers
             double vswr;
             byte errors;
 
-            byte counterCheck = message.GetByte();
+            
             if (counterCheck == 0x67)
             {
                 message.GetByte();
@@ -58,6 +58,7 @@ namespace TrioServer.Handlers
 
                 Core.GetRadioManager().SaveMeasurement(message.RadioSerialNumber, d_Temperature, d_Voltage, d_FreqErr, d_Rx, d_Tx, vswr);
             }
+
             else if(counterCheck == 0x72)
             {
                 byte counter = message.GetByte();

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Net;
-
+using System.Linq;
 
 namespace TrioServer.Radios
 {
@@ -41,6 +41,18 @@ namespace TrioServer.Radios
         public void Close()
         {
 
+        }
+
+        public byte[] SerialNumberParse()
+        {
+            string digits = SerialNumber.ToString("D6");
+
+            byte[] myData = Enumerable.Range(0, digits.Length)
+                         .Where(x => x % 2 == 0)
+                         .Select(x => Convert.ToByte(digits.Substring(x, 2), 16))
+                         .ToArray();
+
+            return myData;
         }
     }
 }
