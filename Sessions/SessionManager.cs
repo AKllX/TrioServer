@@ -121,7 +121,6 @@ namespace TrioServer.Sessions
                 }
 
                 // Adicionado pela Laila
-                Console.WriteLine("Iniciando check de tempo");
                 DateTime timeinit = DateTime.Now;
                 foreach (Session Session in mSessions.Values)
                 {
@@ -134,7 +133,10 @@ namespace TrioServer.Sessions
                         }
                     }
                 }
-                Console.WriteLine(String.Concat("Tempo Gasto: ", Convert.ToString((DateTime.Now - timeinit).TotalMilliseconds)));
+                if ((DateTime.Now - timeinit).TotalMilliseconds > 10)
+                {
+                    Console.WriteLine(String.Concat("Tempo Gasto: ", Convert.ToString((DateTime.Now - timeinit).TotalMilliseconds)));
+                }
             }
 
             foreach (Session SessionDispose in ToDispose)
