@@ -100,6 +100,7 @@ namespace TrioServer.Sessions
         private void OnReceiveData(IAsyncResult Result)
         {
             int ByteCount = 0;
+            byte[] filteredData;
 
             mLastReceived = DateTime.Now;
             try
@@ -117,7 +118,10 @@ namespace TrioServer.Sessions
                 return;
             }
 
-            ProcessData(mBuffer);
+            filteredData = new byte[ByteCount];
+            Buffer.BlockCopy(mBuffer, 0, filteredData, 0, ByteCount);
+
+            ProcessData(filteredData);
 
             BeginReceive();
         }
@@ -204,7 +208,7 @@ namespace TrioServer.Sessions
         public void RunMeasurement(object state)
         {
             IRadioTrio myRadio = mChannel.GetNextRadio();
-            Console.WriteLine(myRadio.Desc);
+            //Console.WriteLine(myRadio.Desc);
             if(myRadio != null)
             {
                 if (MAuthProcessed)
@@ -234,7 +238,6 @@ namespace TrioServer.Sessions
                 {
                     case 1:
                         {
-
                             if ((radioType == RadioType.QR) || (radioType == RadioType.QB))
                             {
                                 SendData(HandshakeComposer.Serialize(this).ToArray());
@@ -257,15 +260,7 @@ namespace TrioServer.Sessions
                                 SendData(CalibrationComposerM.Serialize(this).ToArray());
                             }
 
-                            if (myRadio.OpMode == OperationMode.Mode_M)
-                            {
-                                mMonitorThread = new Timer(new TimerCallback(RunMeasurement), null, TimeSpan.FromMilliseconds(0), TimeSpan.FromSeconds(15));
-                            }
-                            else
-                            {
-                                mMonitorThread = new Timer(new TimerCallback(RunMeasurement), null, TimeSpan.FromMilliseconds(0), TimeSpan.FromSeconds(60));
-                            }
-
+                            mMonitorThread = new Timer(new TimerCallback(RunMeasurement), null, TimeSpan.FromMilliseconds(0), TimeSpan.FromSeconds(Channel.PoolingInterval));
 
                             MAuthProcessed = true;
                             break;
