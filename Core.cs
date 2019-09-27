@@ -17,7 +17,7 @@ namespace TrioServer
         private static ChannelManager m_ChannelManager;
 
         private static string host = "10.160.211.99";
-        private static string db = "trio_teste";
+        private static string db = "trioserver";
 
         public static void Initialize()
         {
