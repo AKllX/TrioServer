@@ -2,8 +2,9 @@
 using System.Net.Sockets;
 using System.Collections.Generic;
 using System.Threading;
-
 using TrioServer.Communication;
+using TrioServer.Radios;
+using TrioServer.Database.Interfaces;
 
 namespace TrioServer.Sessions
 {
@@ -111,15 +112,29 @@ namespace TrioServer.Sessions
                         Session.TryAcknowledge();
                     }
 
-                    if((Session.LastReceived - DateTime.Now).TotalMinutes > 10)
+                    if((DateTime.Now - Session.LastReceived).TotalMinutes > 10)
                     {
                         Session.MAuthProcessed = false;
                         Session.AuthMessageCounter = 0;
                         Session.TryAcknowledge();
                     }
-
-
                 }
+
+                // Adicionado pela Laila
+                Console.WriteLine("Iniciando check de tempo");
+                DateTime timeinit = DateTime.Now;
+                foreach (Session Session in mSessions.Values)
+                {
+                    foreach (Radio Radio in Session.Channel.Radios)
+                    {
+                        if (((DateTime.Now - Radio.TimeStamp).TotalMinutes > 10) && (Radio.CommStatus == 1))
+                        {
+                            Core.GetRadioManager().SetCommStatus(Radio.SerialNumber, 0);
+                            Radio.CommStatus = 0;
+                        }
+                    }
+                }
+                Console.WriteLine(String.Concat("Tempo Gasto: ", Convert.ToString((DateTime.Now - timeinit).TotalMilliseconds)));
             }
 
             foreach (Session SessionDispose in ToDispose)

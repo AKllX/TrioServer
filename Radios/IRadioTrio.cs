@@ -13,9 +13,12 @@ namespace TrioServer.Radios
         RadioType Type { get; }
         OperationMode OpMode { get; }
         bool Initialized { get; }
+        DateTime TimeStamp { get; set; }
+        int CommStatus { get; set; }
 
         int MasterId { get; }
         int ChannelId { get; }
+
 
         void Initialize();
         void Update();

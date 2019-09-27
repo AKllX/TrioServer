@@ -1,0 +1,4 @@
+C:\Users\205001\source\repos\TrioServer\TrioServer\obj\Release\netcoreapp2.0\TrioServer.csprojAssemblyReference.cache
+C:\Users\205001\source\repos\TrioServer\TrioServer\obj\Release\netcoreapp2.0\TrioServer.csproj.CoreCompileInputs.cache
+C:\Users\205001\source\repos\TrioServer\TrioServer\obj\Release\netcoreapp2.0\TrioServer.AssemblyInfoInputs.cache
+C:\Users\205001\source\repos\TrioServer\TrioServer\obj\Release\netcoreapp2.0\TrioServer.AssemblyInfo.cs

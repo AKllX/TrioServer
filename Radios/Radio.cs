@@ -18,6 +18,9 @@ namespace TrioServer.Radios
 
         public int MasterId { get; private set; }
 
+        public DateTime TimeStamp {get; set;}
+        public int CommStatus { get; set; }
+
         public Radio(int id, int serialNum, string descp, RadioType type, OperationMode opm, int mId, int cId)
         {
             Id = id;
@@ -27,6 +30,8 @@ namespace TrioServer.Radios
             Type = type;
             OpMode = opm;
             ChannelId = cId;
+            TimeStamp = DateTime.Now;
+            CommStatus = 0;
         }
         public void Initialize()
         {
