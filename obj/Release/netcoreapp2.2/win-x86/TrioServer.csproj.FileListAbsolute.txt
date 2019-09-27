@@ -1,0 +1,14 @@
+C:\Users\205001\source\repos\TrioServer\TrioServer\bin\Release\netcoreapp2.2\win-x86\hostpolicy.dll
+C:\Users\205001\source\repos\TrioServer\TrioServer\bin\Release\netcoreapp2.2\win-x86\hostfxr.dll
+C:\Users\205001\source\repos\TrioServer\TrioServer\bin\Release\netcoreapp2.2\win-x86\TrioServer.exe
+C:\Users\205001\source\repos\TrioServer\TrioServer\bin\Release\netcoreapp2.2\win-x86\TrioServer.deps.json
+C:\Users\205001\source\repos\TrioServer\TrioServer\bin\Release\netcoreapp2.2\win-x86\TrioServer.runtimeconfig.json
+C:\Users\205001\source\repos\TrioServer\TrioServer\bin\Release\netcoreapp2.2\win-x86\TrioServer.runtimeconfig.dev.json
+C:\Users\205001\source\repos\TrioServer\TrioServer\bin\Release\netcoreapp2.2\win-x86\TrioServer.dll
+C:\Users\205001\source\repos\TrioServer\TrioServer\bin\Release\netcoreapp2.2\win-x86\TrioServer.pdb
+C:\Users\205001\source\repos\TrioServer\TrioServer\obj\Release\netcoreapp2.2\win-x86\TrioServer.csprojAssemblyReference.cache
+C:\Users\205001\source\repos\TrioServer\TrioServer\obj\Release\netcoreapp2.2\win-x86\TrioServer.csproj.CoreCompileInputs.cache
+C:\Users\205001\source\repos\TrioServer\TrioServer\obj\Release\netcoreapp2.2\win-x86\TrioServer.AssemblyInfoInputs.cache
+C:\Users\205001\source\repos\TrioServer\TrioServer\obj\Release\netcoreapp2.2\win-x86\TrioServer.AssemblyInfo.cs
+C:\Users\205001\source\repos\TrioServer\TrioServer\obj\Release\netcoreapp2.2\win-x86\TrioServer.dll
+C:\Users\205001\source\repos\TrioServer\TrioServer\obj\Release\netcoreapp2.2\win-x86\TrioServer.pdb
