@@ -19,7 +19,7 @@ namespace TrioServer.Radios
         public IRadioTrio GetRadioForId(int id)
         {
             IRadioTrio myRadio = null;
-            if(!LoadedRadios.Exists(x => x.Id == id))
+            if (!LoadedRadios.Exists(x => x.Id == id))
             {
                 //TODO: Tentar carregar o rádio
             }
@@ -29,6 +29,15 @@ namespace TrioServer.Radios
             }
 
             return myRadio;
+        }
+        public IRadioTrio GetRadioFromSN(int sn)
+        {
+            IRadioTrio wantedRadio = LoadedRadios.Find(x => x.SerialNumber == sn);
+            if (!wantedRadio.Equals(null))
+            {
+                return wantedRadio;
+            }
+            return null;
         }
 
         public IRadioTrio LoadRadio(DataRow data)
@@ -134,12 +143,14 @@ namespace TrioServer.Radios
                 foreach (DataRow dr in dataTable.Rows)
                 {
                     radios.Add(LoadRadio(dr));
-                }
+                    //Adicionado pela Laila
+                    this.SetCommStatus(LoadRadio(dr).SerialNumber, 0);                }
             }
 
             return radios;
         }
 
+        //Só salva se tiver recebido resposta do rádio
         public void SaveMeasurement(int radio_sn,double temperature, double volts, double freqerr, double rxsig, double txpwr, double vswr)
         {
             using (IQueryAdapter dbClient = Core.GetDatabaseManager().GetQueryReactor())
@@ -154,6 +165,15 @@ namespace TrioServer.Radios
                 dbClient.AddParameter("tx", txpwr);
                 dbClient.AddParameter("vswr", vswr);
                 dbClient.RunQuery();
+            }
+        }
+
+        //  Adicionado pela Laila
+        public void SetCommStatus(int radio_sn, int comm_status)
+        {
+            using (IQueryAdapter dbClient = Core.GetDatabaseManager().GetQueryReactor())
+            {
+                dbClient.RunQuery(String.Concat("UPDATE radios SET comm_status = ",comm_status.ToString()," WHERE radios.serial_number = ", radio_sn.ToString()));
             }
         }
     }

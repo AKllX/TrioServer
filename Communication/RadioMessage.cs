@@ -7,9 +7,11 @@ namespace TrioServer.Communication
     public class RadioMessage
     {
         private byte[] mBody;
+        
         private int mPointer;
         public int RadioSerialNumber { get; private set; }
 
+        public byte[] FullPacket { get; private set; }
         public int Length
         {
             get
@@ -63,14 +65,14 @@ namespace TrioServer.Communication
             byte[] test = ReadBytes(2);
             Array.Reverse(test);
 
-
-            return BitConverter.ToInt16(test);
+            return BitConverter.ToInt16(test,0);
         }
 
         public RadioMessage(int radioSn, byte[] message)
         {
             this.RadioSerialNumber = radioSn;
             mBody = message;
+            FullPacket = message;
         }
     }
 }
